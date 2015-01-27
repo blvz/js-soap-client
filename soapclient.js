@@ -1,12 +1,16 @@
 /*****************************************************************************\
 
  Javascript SOAP Client
- Forked from javascriptsoapclient.codeplex.com and improved by gtathub.
+ Forked from https://github.com/gtathub/js-soap-client,
+ originally from javascriptsoapclient.codeplex.com. Modified for use with
+ nested parameter groups and not passing along the xmlns URL for actions by
+ Mike Tierney.
 
- For new versions check: https://github.com/gtathub/js-soap-client
+ For new versions check: https://github.com/intridea/js-soap-client
 
  * Original work by Matteo Casati (based on v2.4 from 2007-12-21)
  * Improved by Gordon Tschirner (https://github.com/gtathub)
+ * Further modified by Mike Tierney (https://github.com/miketierney)
  * Licensed under Creative Commons (by SA) 2.5
 \*****************************************************************************/
 
@@ -140,12 +144,12 @@ SOAPClientParameters._serialize = function(t, o)
             }
             // Object or custom function
             else
+              s += "<" + t + ">";
                 for(var p in o)
                 {
-                    s += "<" + t + ">";
                     s += SOAPClientParameters._serialize(p, o[p]);
-                    s += "</" + t + ">";
                 }
+                s += "</" + t + ">";
             break;
         default:
             break; // throw new Error(500, "SOAPClientParameters: type '" + typeof(o) + "' is not supported");
@@ -218,7 +222,7 @@ SOAPClient._sendSoapRequest = function(url, method, parameters, async, callback,
     "<Password>"+SOAPClient.authPass+"</Password>" +
     "</AuthHeader></soap:Header>":"") +
     "<soap:Body>" +
-    "<" + method + " xmlns=\"" + ns + "\">" +
+    "<" + method + ">" +
     parameters.toXml() +
     "</" + method + "></soap:Body></soap:Envelope>";
     // send request
