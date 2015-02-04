@@ -71,14 +71,14 @@ SOAPClientParameters._serialize = function(t, o)
         case "number":
         case "boolean":
             s += "<" + t + ">";
-            s += o.toString(); 
+            s += o.toString();
             s += "</" + t + ">";
             break;
         case "object":
             // Date
             if(o.constructor.toString().indexOf("function Date()") > -1)
             {
-        
+
                 var year = o.getFullYear().toString();
                 var month = (o.getMonth() + 1).toString();
                 month = (month.length == 1) ? "0" + month : month;
@@ -108,7 +108,7 @@ SOAPClientParameters._serialize = function(t, o)
             // Array
             else if(o.constructor.toString().indexOf("function Array()") > -1)
             {
-				
+
                 s += "<" + t + " SOAP-ENC:arrayType=\"SOAP-ENC:Array[" + o.length + "]\" xsi:type=\"SOAP-ENC:Array\">";
                 for(var p in o)
                 {
@@ -164,6 +164,7 @@ SOAPClient.password = null;
 SOAPClient.auth = false;
 SOAPClient.authUser = null;
 SOAPClient.authPass = null;
+SOAPClient.explicitNS = false;
 
 SOAPClient.invoke = function(url, method, parameters, async, callback)
 {
@@ -215,6 +216,7 @@ SOAPClient._sendSoapRequest = function(url, method, parameters, async, callback,
     "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
     "xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" " +
     "xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" " +
+    (SOAPClient.explicitNS?"xmlns:tns=\"" + ns + "\"":"") +
     parameters.printSchemaList() +
     ">" +
     (SOAPClient.auth?"<soap:Header><AuthHeader xmlns=\"" + ns + "\">" +
@@ -222,9 +224,10 @@ SOAPClient._sendSoapRequest = function(url, method, parameters, async, callback,
     "<Password>"+SOAPClient.authPass+"</Password>" +
     "</AuthHeader></soap:Header>":"") +
     "<soap:Body>" +
-    "<" + method + ">" +
+    (SOAPClient.explicitNS?"<tns:" + method + ">":"<" + method + " xmlns=\"" + ns + "\">") +
     parameters.toXml() +
-    "</" + method + "></soap:Body></soap:Envelope>";
+    (SOAPClient.explicitNS?"</tns:" + method + ">":"</" + method + ">") +
+    "</soap:Body></soap:Envelope>";
     // send request
     var xmlHttp = SOAPClient._getXmlHttp();
     if (SOAPClient.userName && SOAPClient.password){
@@ -250,7 +253,7 @@ SOAPClient._sendSoapRequest = function(url, method, parameters, async, callback,
         return SOAPClient._onSendSoapRequest(method, async, callback, wsdl, xmlHttp);
 }
 
-SOAPClient._onSendSoapRequest = function(method, async, callback, wsdl, req) 
+SOAPClient._onSendSoapRequest = function(method, async, callback, wsdl, req)
 {
     var o = null;
     var _method = method.replace(/^[A-Za-z]*:/,'');
@@ -300,7 +303,7 @@ SOAPClient._node2object = function(node, wsdlTypes)
         if(typeof tmpNodeNameObject[node.childNodes[i].nodeName] == "undefined")
             tmpNodeNameObject[node.childNodes[i].nodeName] = true;
         else isArray = true;
-            
+
     }
     var isarray = isArray || SOAPClient._getTypeFromWsdl(node.nodeName, wsdlTypes).toLowerCase().indexOf("arrayof") != -1;
     // object node
@@ -402,7 +405,7 @@ SOAPClient._getElementsByTagName = function(document, tagName)
     return document.getElementsByTagName(tagName);
 }
 // private: xmlhttp factory
-SOAPClient._getXmlHttp = function() 
+SOAPClient._getXmlHttp = function()
 {
     try
     {
