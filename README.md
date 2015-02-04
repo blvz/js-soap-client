@@ -1,7 +1,10 @@
 Javascript SOAP Client
 ======================
 
-Forked from http://javascriptsoapclient.codeplex.com/ and modified by gtathub.
+Forked from  
+http://javascriptsoapclient.codeplex.com/  
+https://github.com/gtathub/js-soap-client  
+https://github.com/intridea/js-soap-client  
 
 Improvements
 ------------
